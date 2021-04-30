@@ -22,11 +22,11 @@ def main():
     # Create the job array
     jobs = ArrayJob(out_dir, data, job_script)
     # Setup jobs conf
-    jobs.build_oar_command(minutes=100, queue=tf.oar.Queue.BESTEFFORT)
+    jobs.build_oar_command(minutes=1, queue=tf.oar.Queue.BESTEFFORT)
     # Write scripts
     jobs.dump()
-    # Start the job array (blocking operation)
-    shell_out = jobs.run()
+    # Start the job array
+    shell_out = jobs.run()  # blocking operation
     log.info(shell_out)
 
     log.debug("Resuming program")
