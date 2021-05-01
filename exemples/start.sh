@@ -5,7 +5,7 @@ module load conda/2020.11-python3.8
 
 CUR=$(dirname "$(realpath $0)")
 ROOT="$CUR/.."
-MAIN_NAME="start_oar"
+MAIN_NAME="main"
 
 MAIN_LOGS="$CUR/logs"
 if [ -d $MAIN_LOGS ]; then
