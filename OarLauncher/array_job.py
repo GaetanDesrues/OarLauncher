@@ -34,7 +34,7 @@ class ArrayJob:
     def run(self) -> str:
         shell_out = subprocess.check_output(self.g.start_oar)
         shell_out = shell_out.decode("utf-8").strip()
-        return shell_out
+        return shell_out  # empty except if `stdout` argument of tf.start_oar is set to None
 
     def setup_files(self):
         self.g.file(
@@ -51,7 +51,15 @@ class ArrayJob:
         )
         dump_exe(self.g.runme, runme_script)
 
-    def build_oar_command(self, minutes=1, hours=0, core=1, queue=tf.Queue.BESTEFFORT):
+    def build_oar_command(
+        self,
+        minutes=1,
+        hours=0,
+        core=1,
+        queue=tf.Queue.BESTEFFORT,
+        to_file: bool = True,
+    ):
+        stdout = self.g.oar if to_file else None
         self.oar_cmd = tf.start_oar(
             self.g.runme,
             prgm=tf.Program.OARCTL,
@@ -61,7 +69,7 @@ class ArrayJob:
             wall_time=tf.walltime(minutes=minutes, hours=hours),
             core=core,
             queue=queue,
-            stdout=self.g.oar,
+            stdout=stdout,  # if None, output of oarsub in returned in <ArrayJob.run>
         )
         oar_command = START_OAR.format(oar_command=" ".join(self.oar_cmd))
         dump_exe(self.g.start_oar, oar_command)

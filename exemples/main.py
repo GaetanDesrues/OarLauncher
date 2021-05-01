@@ -22,7 +22,7 @@ def main():
     # Create the job array
     jobs = ArrayJob(out_dir, data, job_script)
     # Setup jobs conf
-    jobs.build_oar_command(minutes=1, queue=tf.oar.Queue.BESTEFFORT)
+    jobs.build_oar_command(minutes=1, queue=tf.oar.Queue.BESTEFFORT, to_file=False)
     # Write scripts
     jobs.dump()
     # Start the job array
