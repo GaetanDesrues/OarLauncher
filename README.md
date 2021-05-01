@@ -1,7 +1,18 @@
 ### Simply start oar job array on nef cluster
 
+#### Install
+```bash
+pip install --upgrade OarLauncher
+```
+
+
+#### Usage
 ```python
-# Choose directory where script and logs are dumped
+import treefiles as tf
+from OarLauncher import ArrayJob
+
+
+# Choose a directory where script and logs are dumped
 out_dir = tf.Tree.new(__file__, "generated").dump(clean=True)
 
 # Create parameters array
@@ -22,5 +33,5 @@ jobs.build_oar_command(minutes=100, queue=tf.oar.Queue.BESTEFFORT)
 jobs.dump()
 # Start the job array (blocking operation)
 shell_out = jobs.run()
-log.info(shell_out)
+print(shell_out)
 ```
