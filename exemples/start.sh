@@ -15,6 +15,9 @@ mkdir -p $MAIN_LOGS
 
 source $ROOT/venv/bin/activate
 
-nohup /usr/bin/time -o $MAIN_LOGS/time.txt python $CUR/$MAIN_NAME.py > $MAIN_LOGS/$MAIN_NAME.stdout 2> $MAIN_LOGS/$MAIN_NAME.stderr &
+## With nohup
+#nohup /usr/bin/time -o $MAIN_LOGS/time.txt python $CUR/$MAIN_NAME.py > $MAIN_LOGS/$MAIN_NAME.stdout 2> $MAIN_LOGS/$MAIN_NAME.stderr &
+#echo "Program '$MAIN_NAME.py' started, run 'ps aux | grep $MAIN_NAME.py' to check"
 
-echo "Program '$MAIN_NAME.py' started, run 'ps aux | grep $MAIN_NAME.py' to check"
+## Without nohup
+/usr/bin/time -o $MAIN_LOGS/time.txt python $CUR/$MAIN_NAME.py
