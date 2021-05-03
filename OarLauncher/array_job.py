@@ -58,6 +58,7 @@ class ArrayJob:
         core=1,
         queue=tf.Queue.BESTEFFORT,
         to_file: bool = True,
+        python_path: str = "",
     ):
         stdout = self.g.oar if to_file else None
         self.oar_cmd = tf.start_oar(
@@ -71,7 +72,13 @@ class ArrayJob:
             queue=queue,
             stdout=stdout,  # if None, output of oarsub in returned in <ArrayJob.run>
         )
-        oar_command = START_OAR.format(oar_command=" ".join(self.oar_cmd))
+
+        if python_path != "":
+            python_path = f"\nexport PYTHONPATH=$PYTHONPATH:{python_path}\n"
+
+        oar_command = START_OAR.format(
+            oar_command=" ".join(self.oar_cmd), python_path=python_path
+        )
         dump_exe(self.g.start_oar, oar_command)
 
     def dump_data(self):
