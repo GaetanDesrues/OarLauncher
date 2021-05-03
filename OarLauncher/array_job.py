@@ -25,9 +25,12 @@ class ArrayJob:
 
         self.oar_cmd = None
 
-    def dump(self):
+    def dump(self, python_path: str = ""):
+        if python_path != "":
+            python_path = f"\nexport PYTHONPATH=$PYTHONPATH:{python_path}\n"
+
         self.dump_data()
-        self.dump_runme()
+        self.dump_runme(python_path)
 
         log.info(f"Files are dumped to file://{self.g.abs()}")
 
@@ -44,10 +47,11 @@ class ArrayJob:
             oar="oarsub_res.txt",
         )
 
-    def dump_runme(self):
+    def dump_runme(self, python_path: str):
         runme_script = RUNME_SCRIPT.format(
             activate=tf.Tree(sys.executable).p.path("activate"),
             python_job=self.job_path,
+            python_path=python_path,
         )
         dump_exe(self.g.runme, runme_script)
 
@@ -58,7 +62,6 @@ class ArrayJob:
         core=1,
         queue=tf.Queue.BESTEFFORT,
         to_file: bool = True,
-        python_path: str = "",
     ):
         stdout = self.g.oar if to_file else None
         self.oar_cmd = tf.start_oar(
@@ -73,12 +76,7 @@ class ArrayJob:
             stdout=stdout,  # if None, output of oarsub in returned in <ArrayJob.run>
         )
 
-        if python_path != "":
-            python_path = f"\nexport PYTHONPATH=$PYTHONPATH:{python_path}\n"
-
-        oar_command = START_OAR.format(
-            oar_command=" ".join(self.oar_cmd), python_path=python_path
-        )
+        oar_command = START_OAR.format(oar_command=" ".join(self.oar_cmd))
         dump_exe(self.g.start_oar, oar_command)
 
     def dump_data(self):
