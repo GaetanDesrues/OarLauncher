@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="OarLauncher",
-    version="0.1.006",
+    version="0.1.009",
     author="Gaetan Desrues",
     author_email="gaetan.desrues@inria.fr",
     description="Description",
