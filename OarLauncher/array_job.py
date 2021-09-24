@@ -1,7 +1,6 @@
 import logging
 import subprocess
 import sys
-from collections import defaultdict
 from typing import Dict, List
 
 import treefiles as tf
@@ -11,7 +10,7 @@ from OarLauncher.templates import RUNME_SCRIPT, START_OAR
 
 
 class ArrayJob:
-    Data = defaultdict(list)
+    # Data = defaultdict(list)  # directly use `defaultdict(list)`
 
     def __init__(
         self, gen_dir: tf.Tree, data: Dict[str, List[str]], job_path: str = None
@@ -32,7 +31,7 @@ class ArrayJob:
         self.dump_data()
         self.dump_runme(python_path)
 
-        log.info(f"Files are dumped to file://{self.g.abs()}")
+        # log.info(f"Files are dumped to file://{self.g.abs()}")
 
     def run(self) -> str:
         shell_out = subprocess.check_output(self.g.start_oar)
@@ -49,7 +48,7 @@ class ArrayJob:
 
     def dump_runme(self, python_path: str):
         runme_script = RUNME_SCRIPT.format(
-            activate=tf.Tree(sys.executable).p.path("activate"),
+            activate=tf.curDirs(sys.executable, "activate"),
             python_job=self.job_path,
             python_path=python_path,
         )
@@ -57,11 +56,8 @@ class ArrayJob:
 
     def build_oar_command(
         self,
-        minutes=1,
-        hours=0,
-        core=1,
-        queue=tf.Queue.BESTEFFORT,
         to_file: bool = True,
+        **kwargs,
     ):
         stdout = self.g.oar if to_file else None
         self.oar_cmd = tf.start_oar(
@@ -70,10 +66,8 @@ class ArrayJob:
             logs_dir=self.g.dir("logs").dump(),
             array_fname=self.g.array,
             do_run=False,
-            wall_time=tf.walltime(minutes=minutes, hours=hours),
-            core=core,
-            queue=queue,
             stdout=stdout,  # if None, output of oarsub in returned in <ArrayJob.run>
+            **kwargs,
         )
 
         oar_command = START_OAR.format(oar_command=" ".join(self.oar_cmd))
