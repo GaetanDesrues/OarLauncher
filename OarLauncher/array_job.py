@@ -24,12 +24,12 @@ class ArrayJob:
 
         self.oar_cmd = None
 
-    def dump(self, python_path: str = ""):
-        if python_path != "":
-            python_path = f"\nexport PYTHONPATH=$PYTHONPATH:{python_path}\n"
+    def dump(self, python_path: List[str] = None):
+        python_path = tf.none(python_path, [])
+        python_path = [f"\nexport PYTHONPATH=$PYTHONPATH:{x}" for x in python_paths]
 
         self.dump_data()
-        self.dump_runme(python_path)
+        self.dump_runme("\n".join(python_path))
 
         # log.info(f"Files are dumped to file://{self.g.abs()}")
 
