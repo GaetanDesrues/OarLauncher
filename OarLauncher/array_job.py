@@ -26,7 +26,7 @@ class ArrayJob:
 
     def dump(self, python_path: List[str] = None):
         python_path = tf.none(python_path, [])
-        python_path = [f"\nexport PYTHONPATH=$PYTHONPATH:{x}" for x in python_paths]
+        python_path = [f"\nexport PYTHONPATH=$PYTHONPATH:{x}" for x in python_path]
 
         self.dump_data()
         self.dump_runme("\n".join(python_path))
