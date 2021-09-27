@@ -1,4 +1,5 @@
 import logging
+from collections import defaultdict
 
 import treefiles as tf
 
@@ -9,8 +10,8 @@ def main():
     # Choose directory where script and logs are dumped
     out_dir = tf.Tree.new(__file__, "generated").dump(clean=True)
 
-    # Create parameters array
-    nb_jobs, data = 10, ArrayJob.Data
+    # Create the parameters array
+    nb_jobs, data = 10, defaultdict(list)
     for i in range(nb_jobs):
         data["simu_dir"].append(f"d_{i}")
         data["infos"].append(f"this is job {i}")
@@ -22,11 +23,19 @@ def main():
     # Create the job array
     jobs = ArrayJob(out_dir, data, job_script)
     # Setup jobs conf
-    jobs.build_oar_command(minutes=1, queue=tf.oar.Queue.BESTEFFORT, to_file=False)
+    jobs.build_oar_command(
+        queue=tf.Queue.BESTEFFORT,
+        to_file=True,  # whereas `shell_out` is dumped to file or returned via command line
+        wall_time=tf.walltime(minutes=2),
+        prgm=tf.Program.OARCTL,  # `OARCTL` is blocking (main process is running until all jobs end), `OARSUB` is not
+    )
     # Write scripts
-    jobs.dump()
+    jobs.dump(
+        # python_path=[...],  # you can give a list of python paths that will be added to PYTHONPATH
+        # MY_ENV=...,  # you can also specify PATH envs by passing them as kwargs
+    )
     # Start the job array
-    shell_out = jobs.run()  # blocking operation
+    shell_out = jobs.run()  # blocking operation if prgm=tf.Program.OARCTL
     log.info(shell_out)
 
     log.debug("Resuming program")
@@ -38,6 +47,5 @@ log = logging.getLogger(__name__)
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     log = tf.get_logger()
-    # log = tf.get_logger(default=False, handlers=[tf.stream_csv_handler()])
 
     main()
