@@ -15,7 +15,5 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     log = tf.get_csv_logger()
 
-    log.debug(sys.argv)
-    args = json.loads(sys.argv[1])
-
+    args = json.loads(json.loads(" ".join(sys.argv[1:])))
     main()

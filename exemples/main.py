@@ -35,6 +35,7 @@ def main():
         # MY_ENV=...,  # you can also specify PATH envs by passing them as kwargs
     )
     # Start the job array
+    log.info(f"Starting jobs, check `oarstat -u`")
     shell_out = jobs.run()  # blocking operation if prgm=tf.Program.OARCTL
     log.info(shell_out)
 

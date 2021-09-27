@@ -14,6 +14,7 @@ fi
 mkdir -p $MAIN_LOGS
 
 source $ROOT/venv/bin/activate
+export PYTHONPATH="$PYTHONPATH:$ROOT"
 
 ## With nohup
 #nohup /usr/bin/time -o $MAIN_LOGS/time.txt python $CUR/$MAIN_NAME.py > $MAIN_LOGS/$MAIN_NAME.stdout 2> $MAIN_LOGS/$MAIN_NAME.stderr &
