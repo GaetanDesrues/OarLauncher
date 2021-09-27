@@ -64,7 +64,7 @@ class ArrayJob:
         stdout = self.g.oar if to_file else None
         self.oar_cmd = tf.start_oar(
             self.g.runme,
-            prgm=tf.Program.OARCTL,
+            # prgm=tf.Program.OARCTL,
             logs_dir=self.g.dir("logs").dump(),
             array_fname=self.g.array,
             do_run=False,
