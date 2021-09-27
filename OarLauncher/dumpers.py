@@ -7,8 +7,8 @@ import treefiles as tf
 
 
 def dump_data(fname, data: Dict[str, List[str]]):
-    opts = dict(separators=(",", ":"))
-    enc_dir = lambda x: f"'{json.dumps(x, **opts)}'"
+    opts = dict(separators=(",", ":"))  # dump without spaces
+    enc_dir = lambda x: f"'{json.dumps(x, **opts)}'"  # enclose in single quotes
 
     _data, n_rows = [], len(next(iter(data.values())))
     for i in range(n_rows):
@@ -28,4 +28,5 @@ def dump(fname, content):
 
 def dump_exe(fname, content):
     dump(fname, content)
+    # make executable
     os.chmod(fname, os.stat(fname).st_mode | stat.S_IEXEC)
