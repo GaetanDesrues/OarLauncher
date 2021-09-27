@@ -47,3 +47,59 @@ jobs.dump(
 shell_out = jobs.run()  # blocking operation if prgm=tf.Program.OARCTL
 print(shell_out)
 ```
+
+## `tf.start_oar`
+
+```python
+def start_oar(
+    runme_str,
+    logs_dir: Union[tf.Tree, str] = None,
+    array_fname: str = None,
+    wall_time: str = walltime(minutes=1),
+    host: int = 1,
+    core: int = 1,
+    job_name: str = None,
+    queue: str = Queue.DEFAULT,
+    cmd_fname: str = None,
+    runme_args: List[str] = None,
+    do_run: bool = True,
+    with_json: bool = False,
+    notify: List = None,
+    prgm: str = Program.OARSUB,
+    stdout: str = None,
+    stderr: str = None,
+) -> Union[str, List[str]]:
+    """
+    Builds an oar command.
+    Usage example:
+    .. code::
+            cdir = tf.Tree.new(__file__)
+            sdir = cdir.dir("OarOut").dump(clean=True)
+            res = start_oar(
+                runme_str=cdir.path("runme.sh"),
+                logs_dir=sdir,
+                walltime=time(minute=10),
+                queue="besteffort",
+                core=2,
+                cmd_fname=sdir.path("cmd.sh"),
+                do_run=True,
+            )
+    :param runme_str: path to the runme script or command line
+    :param logs_dir: directory for std out/err
+    :param array_fname: path to the arguments file (array file)
+    :param wall_time: wall time of the job
+    :param host: numbre of nodes
+    :param core: number of cores
+    :param job_name: job name
+    :param queue: job queue ['default', 'besteffort']
+    :param cmd_fname: path to a file to save the oar command
+    :param runme_args: list of command line arguments given to the runme script
+    :param do_run: whether to execute the command or not
+    :param with_json: add the -J option in oarsub command
+    :param notify: notify options [List], you may use the class NotifyOar to build this option
+    :param prgm: `oarsub` or `oarctl sub`
+    :param stdout: path for stdout
+    :param stderr: path for stderr, defaults to stdout if None
+    :return: The output of the oar command if `do_run` is True else the oar command
+    """
+```
