@@ -7,9 +7,9 @@ py :
 	python -m twine upload  dist/*
 
 git :
-	git commit -am 'update pypi package'
+	git commit -am 'new release'
 	git push origin master
 
 pip :
-	pip install --upgrade OarLauncher
+	# pip install --upgrade OarLauncher
 	echo "run 'pip install --upgrade OarLauncher'"

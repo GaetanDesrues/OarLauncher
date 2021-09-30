@@ -13,8 +13,7 @@ log = logging.getLogger(__name__)
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
-    log = tf.get_logger(default=False, handlers=[tf.stream_csv_handler()])
+    log = tf.get_csv_logger()
 
-    args = json.loads(sys.argv[1])
-
+    args = json.loads(" ".join(sys.argv[1:]))
     main()

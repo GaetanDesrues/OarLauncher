@@ -1,18 +1,16 @@
 import logging
 import subprocess
 import sys
-from collections import defaultdict
 from typing import Dict, List
 
 import treefiles as tf
-import treefiles.oar as oar
 
 from OarLauncher.dumpers import dump_exe, dump_data
-from OarLauncher.templates import RUNME_SCRIPT, START_OAR, NOTIFY_SCRIPT
+from OarLauncher.templates import RUNME_SCRIPT, START_OAR
 
 
 class ArrayJob:
-    Data = defaultdict(list)
+    # Data = defaultdict(list)  # directly use `defaultdict(list)`
 
     def __init__(
         self, gen_dir: tf.Tree, data: Dict[str, List[str]], job_path: str = None
@@ -26,60 +24,56 @@ class ArrayJob:
 
         self.oar_cmd = None
 
-    def dump(self):
-        self.dump_data()
-        self.dump_notif_script()
-        self.dump_oar_command()
-        self.dump_runme()
+    def dump(self, python_path: List[str] = None, **envs):
+        python_path = tf.none(python_path, [])
+        python_path = [f"\nexport PYTHONPATH=$PYTHONPATH:{x}" for x in python_path]
+        for k, v in envs.items():
+            python_path.append(f"\nexport {k}={v}")
 
-        log.info(f"Files are dumped to file://{self.g.abs()}")
+        self.dump_data()
+        self.dump_runme("".join(python_path))
+
+        # log.info(f"Files are dumped to file://{self.g.abs()}")
 
     def run(self) -> str:
         shell_out = subprocess.check_output(self.g.start_oar)
         shell_out = shell_out.decode("utf-8").strip()
-        return shell_out
+        return shell_out  # empty except if `stdout` argument of tf.start_oar is set to None
 
     def setup_files(self):
         self.g.file(
-            "start_oar.sh",
-            fifo="pipe_file.fifo",
-            notify="notify_exec.sh",
+            start_oar="start_oar.sh",
             array="array_args.txt",
             runme="runme.sh",
             oar="oarsub_res.txt",
         )
 
-    def dump_runme(self):
+    def dump_runme(self, python_path: str):
         runme_script = RUNME_SCRIPT.format(
-            activate=tf.Tree(sys.executable).p.path("activate"),
+            activate=tf.curDirs(sys.executable, "activate"),
             python_job=self.job_path,
+            python_path=python_path,
         )
         dump_exe(self.g.runme, runme_script)
 
-    def dump_notif_script(self):
-        notify_script = NOTIFY_SCRIPT.format(fifo_file=self.g.fifo)
-        dump_exe(self.g.notify, notify_script)
-
-    def build_oar_command(self, minutes=1, hours=0, core=1, queue=oar.Queue.BESTEFFORT):
-        self.oar_cmd = oar.start_oar(
+    def build_oar_command(
+        self,
+        to_file: bool = True,
+        **kwargs,
+    ):
+        stdout = self.g.oar if to_file else None
+        self.oar_cmd = tf.start_oar(
             self.g.runme,
+            # prgm=tf.Program.OARCTL,
             logs_dir=self.g.dir("logs").dump(),
             array_fname=self.g.array,
-            notify=oar.NotifyOar(self.g.notify).exec,
             do_run=False,
-            wall_time=oar.walltime(minutes=minutes, hours=hours),
-            core=core,
-            queue=queue,
+            stdout=stdout,  # if None, output of oarsub in returned in <ArrayJob.run>
+            **kwargs,
         )
 
-    def dump_oar_command(self,):
-        start_oar_script = START_OAR.format(
-            oar_command=" ".join(self.oar_cmd),
-            fifo_file=self.g.fifo,
-            oar_msg_file=self.g.oar,
-            nb_jobs=self.nb_jobs,
-        )
-        dump_exe(self.g.start_oar, start_oar_script)
+        oar_command = START_OAR.format(oar_command=" ".join(self.oar_cmd))
+        dump_exe(self.g.start_oar, oar_command)
 
     def dump_data(self):
         dump_data(self.g.array, self.data)
