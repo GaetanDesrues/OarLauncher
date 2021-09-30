@@ -11,11 +11,11 @@ def process_args(argv) -> J:
     # print(argv)
     if len(argv) == 0:
         return j
-    elif 'oarctl' in argv[0]:
-        j.prgm = 'oarctl'
+    elif argv[1] == "sub":
+        j.prgm = "oarctl"
         argv = argv[2:]
-    elif 'oarsub' in argv[0]:
-        j.prgm = 'oarsub'
+    else:
+        j.prgm = "oarsub"
         argv = argv[1:]
     args = " ".join(argv)
     # print(args)

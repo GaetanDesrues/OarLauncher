@@ -33,7 +33,7 @@ class ArrayJob:
         self.dump_data()
         self.dump_runme(activate=activate, python_path="".join(python_path))
 
-        # log.info(f"Files are dumped to file://{self.g.abs()}")
+        log.info(f"Files are dumped to file://{self.g.abs()}")
 
     def run(self) -> str:
         shell_out = subprocess.check_output(self.g.start_oar)

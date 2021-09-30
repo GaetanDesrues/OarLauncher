@@ -1,28 +1,17 @@
 import logging
 import subprocess
 import sys
-
-# import prettyprinter as pp
+from contextlib import redirect_stdout
 from functools import partial
 from multiprocessing import Pool
-
-import treefiles as tf
 
 from process_args import process_args
 
 log = logging.getLogger(__name__)
 
 
-def start_job(x, job=None):
-    return subprocess.call([job, x.strip()])
-
-
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
-    log = tf.get_logger()
-
-    job = process_args(sys.argv)
-
+def main(job):
+    # import prettyprinter as pp
     # pp.install_extras(exclude=["django", "attrs", "ipython_repr_pretty", "ipython"])
     # pp.pprint(job)
 
@@ -30,7 +19,6 @@ if __name__ == "__main__":
         ct = f.readlines()
     ct = [x for x in ct if not x.startswith("source /etc/profile.d/modules.sh")]
     ct = [x for x in ct if not x.startswith("module load")]
-    # print(ct)
     with open(job.runme, "w") as f:
         f.write(" ".join(ct))
 
@@ -38,7 +26,19 @@ if __name__ == "__main__":
         with open(job.param_file) as f:
             data = f.readlines()
 
-    with Pool(len(data)) as p:
-        res = p.map(partial(start_job, job=job.runme), data)
+    print(f"Starting {len(data)} jobs")
+    print("\n".join([f"JobID: 1512546{x}" for x in range(len(data))]))
 
-    print(res)
+    for x in data:
+        subprocess.call([job.runme, x.strip()])
+
+
+if __name__ == "__main__":
+    _job = process_args(sys.argv)
+
+    if _job.script_stdout:
+        with open(_job.script_stdout, "w") as f:
+            with redirect_stdout(f):
+                main(_job)
+    else:
+        main(_job)
