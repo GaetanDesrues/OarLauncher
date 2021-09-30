@@ -12,5 +12,5 @@ module load conda/2020.11-python3.8
 
 source {activate}
 {python_path}
-python {python_job} $1
+python {python_job} "$@"
 """.strip()
