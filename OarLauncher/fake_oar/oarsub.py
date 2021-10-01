@@ -10,6 +10,10 @@ from process_args import process_args
 log = logging.getLogger(__name__)
 
 
+def worker(x, name=None):
+    return subprocess.call([name, x.strip()])
+
+
 def main(job):
     # import prettyprinter as pp
     # pp.install_extras(exclude=["django", "attrs", "ipython_repr_pretty", "ipython"])
@@ -29,8 +33,11 @@ def main(job):
     print(f"Starting {len(data)} jobs")
     print("\n".join([f"JobID: 1512546{x}" for x in range(len(data))]))
 
-    for x in data:
-        subprocess.call([job.runme, x.strip()])
+    # for x in data:
+    #     subprocess.call([job.runme, x.strip()])
+
+    with Pool() as p:
+        p.map(partial(worker, name=job.runme), data)
 
 
 if __name__ == "__main__":
