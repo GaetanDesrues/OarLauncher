@@ -20,18 +20,16 @@ class ArrayJob:
         self.job_path = job_path
 
         self.setup_files()
-        self.nb_jobs = len(next(iter(data.values())))
+        if len(data) == 0:
+            self.nb_jobs = 0
+        else:
+            self.nb_jobs = len(next(iter(data.values())))
 
         self.oar_cmd = None
 
     def dump(self, activate: str = None, python_path: List[str] = None, **envs):
-        python_path = tf.none(python_path, [])
-        python_path = [f"\nexport PYTHONPATH=$PYTHONPATH:{x}" for x in python_path]
-        for k, v in envs.items():
-            python_path.append(f"\nexport {k}={v}")
-
         self.dump_data()
-        self.dump_runme(activate=activate, python_path="".join(python_path))
+        self.dump_runme(activate, python_path, **envs)
 
         log.info(f"Files are dumped to file://{self.g.abs()}")
 
@@ -48,7 +46,13 @@ class ArrayJob:
             oar="oarsub_res.txt",
         )
 
-    def dump_runme(self, python_path: str, activate: str = None):
+    def dump_runme(self, activate: str = None, python_path: List[str] = None, **envs):
+        python_path = tf.none(python_path, [])
+        python_path = [f"\nexport PYTHONPATH=$PYTHONPATH:{x}" for x in python_path]
+        for k, v in envs.items():
+            python_path.append(f"\nexport {k}={v}")
+        python_path = ''.join(python_path)
+
         act = tf.none(activate, tf.curDirs(sys.executable, "activate"))
         runme_script = RUNME_SCRIPT.format(
             activate=act,

@@ -11,7 +11,7 @@ log = logging.getLogger(__name__)
 
 
 def worker(x, name=None):
-    return subprocess.call([name, x.strip()])
+    return subprocess.check_output([name, x.strip()]).decode(sys.stdout.encoding)
 
 
 def main(job):
@@ -30,14 +30,19 @@ def main(job):
         with open(job.param_file) as f:
             data = f.readlines()
 
-    print(f"Starting {len(data)} jobs")
-    print("\n".join([f"JobID: 1512546{x}" for x in range(len(data))]))
+        print(f"Starting {len(data)} jobs")
+        print("\n".join([f"JobID: 1512546{x}" for x in range(len(data))]))
 
-    # for x in data:
-    #     subprocess.call([job.runme, x.strip()])
+        # for x in data:
+        #     subprocess.call([job.runme, x.strip()])
 
-    with Pool() as p:
-        p.map(partial(worker, name=job.runme), data)
+        with Pool(job.core) as p:
+            log.info(f"Starting {len(data)} jobs on {job.core} cores")
+            p.map(partial(worker, name=job.runme), data)
+
+    else:
+        print(f"Starting 1 job\nJobID: 15125463")
+        print(worker(' '.join(job.args), name=job.runme))
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 import logging
 import re
 from dataclasses import dataclass
-from typing import TypeVar
+from typing import TypeVar, List
 
 J = TypeVar("J", bound="Job")
 
@@ -26,7 +26,8 @@ def process_args(argv) -> J:
     j.walltime = m.group(3)
 
     m = re.search(r"--array-param-file (/?\S+)", args)
-    j.param_file = m.group(1)
+    if m:
+        j.param_file = m.group(1)
 
     m = re.search(r"--stdout (/?\S+)", args)
     j.stdout = m.group(1)
@@ -44,9 +45,15 @@ def process_args(argv) -> J:
         if j.script_stderr == "&1":
             j.script_stderr = j.script_stdout
 
-    for x in argv[::2]:
-        if "--" not in x:
+    for i, x in enumerate(argv[::2]):
+        if not x.startswith("--"):
             j.runme = x
+            args = []
+            for y in argv[2 * i + 1 :]:
+                if y.startswith(">"):
+                    break
+                args.append(y)
+            j.args = args
             break
 
     return j
@@ -63,8 +70,31 @@ class Job:
     script_stdout: str = None
     script_stderr: str = None
     runme: str = None
+    args: List[str] = None
     prgm: str = None
     param_file: str = None
 
 
 log = logging.getLogger(__name__)
+
+if __name__ == "__main__":
+    j = process_args(
+        [
+            "oarctl",
+            "sub",
+            "--resource",
+            "/host=1/core=1,walltime=00:02:00",
+            "--queue",
+            "besteffort",
+            "--stdout",
+            "BenchSA/02_10_01/WithDataFrom_3/generated_job_array/logs/OAR.%jobid%.stdout",
+            "--stderr",
+            "BenchSA/02_10_01/WithDataFrom_3/generated_job_array/logs/OAR.%jobid%.stderr",
+            "BenchSA/02_10_01/WithDataFrom_3/generated_job_array/runme.sh",
+            "BenchSA/02_10_01/WithDataFrom_3/infos.json",
+            ">",
+            "BenchSA/02_10_01/WithDataFrom_3/generated_job_array/oarsub_res.txt",
+            "2>&1",
+        ]
+    )
+    print(j.args)
