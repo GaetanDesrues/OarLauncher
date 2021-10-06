@@ -1,4 +1,3 @@
-import logging
 import subprocess
 import sys
 from contextlib import redirect_stdout
@@ -7,11 +6,19 @@ from multiprocessing import Pool
 
 from process_args import process_args
 
-log = logging.getLogger(__name__)
 
-
-def worker(x, name=None):
-    return subprocess.check_output([name, x.strip()]).decode(sys.stdout.encoding)
+def worker(x, out=None, name=None):
+    if out:
+        # redirect does not work with processes: may do it in runme.sh but oarsub manages logs itself
+        with open(out, "w") as f:
+            with redirect_stdout(f):
+                print(f"Runme args: {x.strip()}")
+                # TODO: implement > stdout 2> stderr in subprocess.check_output
+                return subprocess.check_output([name, x.strip()]).decode(
+                    sys.stdout.encoding
+                )
+    else:
+        return subprocess.check_output([name, x.strip()]).decode(sys.stdout.encoding)
 
 
 def main(job):
@@ -31,18 +38,25 @@ def main(job):
             data = f.readlines()
 
         print(f"Starting {len(data)} jobs")
-        print("\n".join([f"JobID: 1512546{x}" for x in range(len(data))]))
 
-        # for x in data:
-        #     subprocess.call([job.runme, x.strip()])
+        jobids = [1506000 + x for x in range(len(data))]
+        print("\n".join([f"JobID: {x}" for x in jobids]))
+
+        out = None
+        if job.stdout:
+            out = [job.stdout.replace("%jobid%", str(x)) for x in jobids]
 
         with Pool(int(job.core)) as p:
-            log.info(f"Starting {len(data)} jobs on {job.core} cores")
-            p.map(partial(worker, name=job.runme), data)
+            print(f"Starting {len(data)} jobs on {job.core} cores")
+            p.starmap(partial(worker, name=job.runme), zip(data, out))
 
     else:
-        print(f"Starting 1 job\nJobID: 15125463")
-        print(worker(" ".join(job.args), name=job.runme))
+        print(f"Starting 1 job\nJobID: 1506000")
+
+        out = None
+        if job.stdout:
+            out = job.stdout.replace("%jobid%", "1506000")
+        worker(" ".join(job.args), name=job.runme, out=out)
 
 
 if __name__ == "__main__":
