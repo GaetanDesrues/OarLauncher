@@ -36,13 +36,13 @@ def main(job):
         # for x in data:
         #     subprocess.call([job.runme, x.strip()])
 
-        with Pool(job.core) as p:
+        with Pool(int(job.core)) as p:
             log.info(f"Starting {len(data)} jobs on {job.core} cores")
             p.map(partial(worker, name=job.runme), data)
 
     else:
         print(f"Starting 1 job\nJobID: 15125463")
-        print(worker(' '.join(job.args), name=job.runme))
+        print(worker(" ".join(job.args), name=job.runme))
 
 
 if __name__ == "__main__":
