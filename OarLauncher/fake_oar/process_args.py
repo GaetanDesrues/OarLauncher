@@ -56,6 +56,11 @@ def process_args(argv) -> J:
             j.args = args
             break
 
+    yy = j.runme.split(" ")
+    if len(yy) > 1:
+        j.args.insert(0, " ".join(yy[1:]))
+        j.runme = yy[0]
+
     return j
 
 
@@ -90,11 +95,11 @@ if __name__ == "__main__":
             "BenchSA/02_10_01/WithDataFrom_3/generated_job_array/logs/OAR.%jobid%.stdout",
             "--stderr",
             "BenchSA/02_10_01/WithDataFrom_3/generated_job_array/logs/OAR.%jobid%.stderr",
-            "BenchSA/02_10_01/WithDataFrom_3/generated_job_array/runme.sh",
-            "BenchSA/02_10_01/WithDataFrom_3/infos.json",
+            "BenchSA/02_10_01/WithDataFrom_3/generated_job_array/runme.sh BenchSA/02_10_01/WithDataFrom_3/infos.json",
             ">",
             "BenchSA/02_10_01/WithDataFrom_3/generated_job_array/oarsub_res.txt",
             "2>&1",
         ]
     )
+    print(j.runme)
     print(j.args)
